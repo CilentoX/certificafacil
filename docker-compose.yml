@@ -11,8 +11,8 @@ services:
       - DB_PORT=3306
       - DB_NAME=${DB_NAME:-certificafacil}
       - DB_USER=${DB_USER:-certificafacil}
-      - DB_PASS=${DB_PASS:-certificafacil_secret}
-      - APP_URL=${APP_URL:-https://certificafacil.qwertyatlas.online}
+      - DB_PASS=$SERVICE_PASSWORD_DB
+      - APP_URL=${SERVICE_FQDN_APP:-https://certificafacil.qwertyatlas.online}
       - PUBLIC_KEY=${PUBLIC_KEY:-}
       - ACCESS_TOKEN=${ACCESS_TOKEN:-}
       - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET:-}
@@ -31,29 +31,20 @@ services:
       context: .
       dockerfile: docker/mysql/Dockerfile
     restart: unless-stopped
+    exclude_from_hc: true
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root_secret}
+      MYSQL_ROOT_PASSWORD: $SERVICE_PASSWORD_DBROOT
       MYSQL_DATABASE: ${DB_NAME:-certificafacil}
       MYSQL_USER: ${DB_USER:-certificafacil}
-      MYSQL_PASSWORD: ${DB_PASS:-certificafacil_secret}
+      MYSQL_PASSWORD: $SERVICE_PASSWORD_DB
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test:
-        [
-          'CMD',
-          'mysqladmin',
-          'ping',
-          '-h',
-          'localhost',
-          '-u',
-          'root',
-          '-p${DB_ROOT_PASS:-root_secret}',
-        ]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
+      retries: 10
+      start_period: 60s
 
 volumes:
   db_data:
