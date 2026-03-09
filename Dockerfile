@@ -60,15 +60,6 @@ COPY . .
 RUN rm -f _temp_admin.php debug_generate.log _output.txt start_php.bat \
     && rm -rf .git
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html \
-    && chmod -R 775 /var/www/html/uploads \
-    && chmod -R 775 /var/www/html/assets/templates \
-    && chmod -R 775 /var/www/html/assets/fonts \
-    && chmod -R 775 /var/www/html/assets/images \
-    && chmod -R 775 /var/www/html/assets/configs
-
 # Create required directories
 RUN mkdir -p /var/www/html/uploads \
     /var/www/html/assets/templates \
@@ -77,6 +68,15 @@ RUN mkdir -p /var/www/html/uploads \
     /var/www/html/assets/configs \
     /var/log/supervisor \
     /run/nginx
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 /var/www/html/uploads \
+    && chmod -R 775 /var/www/html/assets/templates \
+    && chmod -R 775 /var/www/html/assets/fonts \
+    && chmod -R 775 /var/www/html/assets/images \
+    && chmod -R 775 /var/www/html/assets/configs
 
 EXPOSE 80
 
