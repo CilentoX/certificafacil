@@ -18,7 +18,9 @@ RUN apk add --no-cache \
     font-dejavu \
     font-noto \
     ttf-liberation \
-    fontconfig
+    fontconfig \
+    # Netcat for DB wait script
+    netcat-openbsd
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd \
@@ -62,7 +64,7 @@ RUN rm -f _temp_admin.php debug_generate.log _output.txt start_php.bat \
 
 # Entrypoint script (waits for MySQL)
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Create required directories
 RUN mkdir -p /var/www/html/uploads \
