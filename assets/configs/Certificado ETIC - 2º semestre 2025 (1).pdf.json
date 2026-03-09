@@ -1,0 +1,54 @@
+{
+    "text_fields": [
+        {
+            "content": "Concluiu com êxito, o Curso {curso}, no período de agosto a dezembro, realizado no ETIC - Espaço de Tecnologia e Inclusão Comunitária do Bingen - Rua Bingen, 520 - Bingen, Petrópolis, RJ.",
+            "font": "arial",
+            "font_size": 12,
+            "color": "#000000",
+            "align": "center",
+            "line_height": 1.3,
+            "letter_spacing": 0,
+            "auto_resize": true,
+            "rect": [
+                59,
+                349,
+                785,
+                485
+            ]
+        },
+        {
+            "content": "{nome}",
+            "font": "Arial",
+            "font_size": 24,
+            "color": "#000000",
+            "align": "center",
+            "line_height": 1.2,
+            "letter_spacing": 0,
+            "auto_resize": true,
+            "rect": [
+                168.45000000000005,
+                270.749993,
+                673.8,
+                310.749993
+            ]
+        }
+    ],
+    "images": [
+        {
+            "path": "assets\/images\/assinatura_hingo.png",
+            "x": 472,
+            "y": 418,
+            "w": 81,
+            "h": 65,
+            "rot": 0
+        },
+        {
+            "path": "assets\/images\/assinaturasamir.png",
+            "x": 261,
+            "y": 400.5,
+            "w": 100,
+            "h": 100,
+            "rot": 0
+        }
+    ]
+}

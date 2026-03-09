@@ -1,0 +1,14 @@
+.git
+.gitignore
+.env
+*.md
+docker-compose.yml
+Dockerfile
+_temp_admin.php
+_output.txt
+debug_generate.log
+start_php.bat
+docs/
+.vscode/
+*.log
+node_modules/

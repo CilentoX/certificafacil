@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CertificaFacil</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Icons & UI libs -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/hotkeys-js@3.13.7/dist/hotkeys.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" defer></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/js-confetti@0.12.0/dist/js-confetti.browser.js"
+      defer
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+    <!-- Tippy.js tooltips -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <!-- Pickr color picker -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js" defer></script>
+    <!-- Animate.css -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <!-- App scripts -->
+    <script src="js/api.js" defer></script>
+    <script src="js/state.js" defer></script>
+    <script src="js/canvas.js" defer></script>
+    <script src="js/main.js" defer></script>
+  </head>
+  <body>
+    <!-- Loader -->
+    <div id="loader" class="loader hidden">
+      <div class="loader-card">
+        <div class="spinner"></div>
+        <p id="loader-text">Processando...</p>
+      </div>
+    </div>
+
+    <!-- ═══ TOP BAR ═══ -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">
+          <img
+            src="/assets/logo-white.svg"
+            alt="CertificaFacil"
+            style="height: 24px; width: auto"
+          />
+        </div>
+        <div class="topbar-sep"></div>
+        <span id="tpl-name" class="topbar-file">Nenhum template</span>
+      </div>
+      <div class="topbar-center">
+        <button class="tb-btn" onclick="zoomOut()" title="Zoom -">
+          <i data-lucide="minus"></i>
+        </button>
+        <button class="tb-btn zoom-lbl" onclick="zoomReset()">
+          <span id="zoom-val">100</span>%
+        </button>
+        <button class="tb-btn" onclick="zoomIn()" title="Zoom +"><i data-lucide="plus"></i></button>
+        <button class="tb-btn" onclick="zoomFit()" title="Fit">
+          <i data-lucide="maximize-2"></i>
+        </button>
+      </div>
+      <div class="topbar-right">
+        <span id="api-status" class="status offline"><span class="dot"></span>Offline</span>
+        <div class="topbar-sep"></div>
+        <button class="tb-btn" id="btn-grid" onclick="toggleGrid()" title="Grade">
+          <i data-lucide="grid-3x3"></i>
+        </button>
+        <button class="tb-btn" id="btn-rulers" onclick="toggleRulers()" title="Réguas">
+          <i data-lucide="ruler"></i>
+        </button>
+        <button class="tb-btn" id="btn-snap" onclick="toggleSnap()" title="Snap">
+          <i data-lucide="magnet"></i>
+        </button>
+        <div class="topbar-sep"></div>
+        <span id="autosave-status" class="autosave-indicator saved">
+          <i data-lucide="cloud"></i>
+          <span>Salvo</span>
+        </span>
+        <button class="btn-sec" onclick="saveConfigToServer()">
+          <i data-lucide="save"></i>Salvar
+        </button>
+        <button class="btn-pri" onclick="generateBatch()">
+          <i data-lucide="download"></i>Gerar Lote
+        </button>
+        <div class="topbar-sep"></div>
+        <!-- User Account Menu -->
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <div class="user-trigger" id="user-trigger" onclick="toggleUserMenu()">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <span class="user-name-text" id="user-name-top">Carregando...</span>
+            <i data-lucide="chevron-down" class="user-chevron"></i>
+          </div>
+          <div class="user-dropdown" id="user-dropdown">
+            <div class="ud-header">
+              <div class="user-avatar" id="ud-avatar">?</div>
+              <div class="ud-info">
+                <div class="ud-name" id="ud-name">—</div>
+                <div class="ud-email" id="ud-email">—</div>
+              </div>
+            </div>
+            <div class="ud-stats">
+              <div class="ud-stat">
+                <div class="ud-stat-val" id="ud-certs">0</div>
+                <div class="ud-stat-label">Certificados</div>
+              </div>
+              <div class="ud-stat">
+                <div class="ud-stat-val" id="ud-templates">0</div>
+                <div class="ud-stat-label">Templates</div>
+              </div>
+            </div>
+            <div class="ud-plan-row">
+              <span class="ud-plan-label">Plano atual</span>
+              <span class="plan-badge trial" id="ud-plan">Trial</span>
+            </div>
+            <div class="ud-items">
+              <button class="ud-item" onclick="window.location.href = '/'">
+                <i data-lucide="home"></i> Página inicial
+              </button>
+              <button class="ud-item" onclick="window.location.href = '/settings'">
+                <i data-lucide="settings"></i> Configurações
+              </button>
+              <button
+                class="ud-item"
+                id="ud-admin-btn"
+                style="display: none"
+                onclick="window.location.href = '/admin'"
+              >
+                <i data-lucide="shield"></i> Painel Admin
+              </button>
+              <div class="ud-sep"></div>
+              <button class="ud-item danger" onclick="logoutUser()">
+                <i data-lucide="log-out"></i> Sair da conta
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ MAIN LAYOUT ═══ -->
+    <div class="app">
+      <!-- Sidebar Nav -->
+      <nav class="sidebar" id="sidebar">
+        <div
+          class="sb-icon active"
+          data-panel="templates"
+          onclick="switchPanel('templates', this)"
+          data-tippy-content="Templates"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="layout-template"></i><span>Templates</span>
+        </div>
+        <div
+          class="sb-icon"
+          data-panel="layers"
+          onclick="switchPanel('layers', this)"
+          data-tippy-content="Camadas"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="layers"></i><span>Camadas</span>
+        </div>
+        <div
+          class="sb-icon"
+          data-panel="text"
+          onclick="switchPanel('text', this)"
+          data-tippy-content="Texto"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="type"></i><span>Texto</span>
+        </div>
+        <div
+          class="sb-icon"
+          data-panel="images"
+          onclick="switchPanel('images', this)"
+          data-tippy-content="Imagens"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="image"></i><span>Imagens</span>
+        </div>
+        <div
+          class="sb-icon"
+          data-panel="students"
+          onclick="switchPanel('students', this)"
+          data-tippy-content="Alunos"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="users"></i><span>Alunos</span>
+        </div>
+        <div class="sb-spacer"></div>
+        <div
+          class="sb-icon"
+          onclick="window.location.href = '/'"
+          data-tippy-content="Página inicial"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="home"></i><span>Início</span>
+        </div>
+        <div
+          class="sb-icon"
+          onclick="showHelp()"
+          data-tippy-content="Atalhos"
+          data-tippy-placement="right"
+        >
+          <i data-lucide="help-circle"></i><span>Ajuda</span>
+        </div>
+      </nav>
+
+      <!-- Side Panel -->
+      <aside class="panel" id="panel">
+        <!-- ── Templates ── -->
+        <section class="pane active" id="pane-templates">
+          <div class="pane-head">
+            <h2><i data-lucide="layout-template"></i>Templates</h2>
+          </div>
+          <div class="pane-body">
+            <div
+              class="drop-zone"
+              id="drop-zone"
+              onclick="document.getElementById('file-tpl').click()"
+            >
+              <i data-lucide="upload-cloud"></i>
+              <span>Clique ou arraste um PDF</span>
+              <small>Formatos: .pdf</small>
+            </div>
+            <input
+              type="file"
+              id="file-tpl"
+              class="hidden"
+              accept=".pdf"
+              onchange="uploadTemplate(this)"
+            />
+            <div id="tpl-list" class="items"></div>
+          </div>
+        </section>
+
+        <!-- ── Camadas ── -->
+        <section class="pane" id="pane-layers">
+          <div class="pane-head">
+            <h2><i data-lucide="layers"></i>Camadas</h2>
+            <span id="layer-count" class="badge">0</span>
+          </div>
+          <div class="pane-body">
+            <div class="layer-actions">
+              <button class="btn-pri f1" onclick="addTextField()" data-tippy-content="Novo texto">
+                <i data-lucide="type"></i>Texto
+              </button>
+              <button class="btn-out f1" onclick="uploadImage()" data-tippy-content="Nova imagem">
+                <i data-lucide="image"></i>Imagem
+              </button>
+            </div>
+            <div class="layer-toolbar">
+              <button class="tb-btn sm" onclick="layerMoveUp()" data-tippy-content="Mover acima">
+                <i data-lucide="chevron-up"></i>
+              </button>
+              <button class="tb-btn sm" onclick="layerMoveDown()" data-tippy-content="Mover abaixo">
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div style="flex: 1"></div>
+              <button class="tb-btn sm" onclick="layerDuplicate()" data-tippy-content="Duplicar">
+                <i data-lucide="copy"></i>
+              </button>
+              <button class="tb-btn sm" onclick="layerDelete()" data-tippy-content="Excluir">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </div>
+            <div id="layer-list" class="layer-list"></div>
+          </div>
+        </section>
+
+        <!-- ── Texto ── -->
+        <section class="pane" id="pane-text">
+          <div class="pane-head">
+            <h2><i data-lucide="type"></i>Texto</h2>
+          </div>
+          <div class="pane-body">
+            <button class="btn-pri w100" onclick="addTextField()">
+              <i data-lucide="plus"></i>Novo Campo
+            </button>
+
+            <div class="grp">
+              <label class="grp-title">Conteúdo</label>
+              <div
+                id="sel-content"
+                class="code-ta badge-editor"
+                contenteditable="true"
+                data-placeholder="Selecione um elemento..."
+                oninput="onBadgeEditorInput()"
+              ></div>
+              <div class="tags" id="var-tags">
+                <!-- variable tags rendered dynamically -->
+              </div>
+              <div class="tags">
+                <button class="tag" onclick="insertTag('[B]')"><b>B</b></button>
+                <button class="tag" onclick="insertTag('[I]')"><i>I</i></button>
+                <button class="tag tag-add" onclick="addNewVariable()" title="Nova variável">
+                  <i data-lucide="plus" style="width: 12px; height: 12px"></i>Variável
+                </button>
+              </div>
+            </div>
+
+            <div class="grp">
+              <label class="grp-title">Tipografia</label>
+              <div class="row">
+                <label>Fonte</label
+                ><select id="sel-font" onchange="updateEl('font', this.value)"></select>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Tamanho</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="sel-fsize"
+                      min="6"
+                      max="200"
+                      oninput="updateEl('fontSize', this.value)"
+                    /><span>px</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Cor</label>
+                  <div class="color-wrap">
+                    <input
+                      type="color"
+                      id="sel-color"
+                      oninput="updateEl('color', this.value)"
+                    /><span id="color-lbl">#000000</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <label>Alinhamento</label>
+                <div class="align-grp">
+                  <button class="al-btn" data-al="left" onclick="setAlign('left', this)">
+                    <i data-lucide="align-left"></i>
+                  </button>
+                  <button class="al-btn on" data-al="center" onclick="setAlign('center', this)">
+                    <i data-lucide="align-center"></i>
+                  </button>
+                  <button class="al-btn" data-al="right" onclick="setAlign('right', this)">
+                    <i data-lucide="align-right"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Entrelinha</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="sel-lh"
+                      step="0.1"
+                      min="0.5"
+                      max="5"
+                      oninput="updateEl('lineHeight', this.value)"
+                    /><span>×</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Espaçamento</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="sel-ls"
+                      step="0.1"
+                      min="-5"
+                      max="20"
+                      oninput="updateEl('letterSpacing', this.value)"
+                    /><span>px</span>
+                  </div>
+                </div>
+              </div>
+              <label class="chk"
+                ><input
+                  type="checkbox"
+                  id="sel-auto"
+                  onchange="updateEl('autoResize', this.checked)"
+                  checked
+                /><span>Auto-ajustar tamanho</span></label
+              >
+            </div>
+
+            <div class="grp">
+              <label class="grp-title">Aparência</label>
+              <div class="row2">
+                <div class="field">
+                  <label>Opacidade</label>
+                  <div class="slider-wrap">
+                    <input
+                      type="range"
+                      id="sel-opacity"
+                      min="0"
+                      max="100"
+                      value="100"
+                      oninput="
+                        updateEl('opacity', this.value);
+                        document.getElementById('sel-opacity-val').textContent = this.value + '%';
+                      "
+                    />
+                    <span id="sel-opacity-val" class="slider-val">100%</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Rotação</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="sel-rotation"
+                      min="-360"
+                      max="360"
+                      step="1"
+                      value="0"
+                      oninput="updateEl('rotation', this.value)"
+                    /><span>°</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grp">
+              <label class="grp-title">Posição & Tamanho</label>
+              <div class="row2">
+                <div class="field">
+                  <label>X</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="pos-x"
+                      step="1"
+                      oninput="updateEl('posX', this.value)"
+                    /><span>pt</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Y</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="pos-y"
+                      step="1"
+                      oninput="updateEl('posY', this.value)"
+                    /><span>pt</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>W</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="pos-w"
+                      step="1"
+                      oninput="updateEl('posW', this.value)"
+                    /><span>pt</span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>H</label>
+                  <div class="inp-u">
+                    <input
+                      type="number"
+                      id="pos-h"
+                      step="1"
+                      oninput="updateEl('posH', this.value)"
+                    /><span>pt</span>
+                  </div>
+                </div>
+              </div>
+              <label class="grp-title" style="margin-top: 6px">Alinhamento na Página</label>
+              <div class="align-toolbar">
+                <button
+                  class="al-btn"
+                  onclick="alignElement('left')"
+                  data-tippy-content="Alinhar à esquerda"
+                >
+                  <i data-lucide="align-start-vertical"></i>
+                </button>
+                <button
+                  class="al-btn"
+                  onclick="alignElement('centerH')"
+                  data-tippy-content="Centralizar horizontal"
+                >
+                  <i data-lucide="align-center-vertical"></i>
+                </button>
+                <button
+                  class="al-btn"
+                  onclick="alignElement('right')"
+                  data-tippy-content="Alinhar à direita"
+                >
+                  <i data-lucide="align-end-vertical"></i>
+                </button>
+                <div class="align-sep"></div>
+                <button
+                  class="al-btn"
+                  onclick="alignElement('top')"
+                  data-tippy-content="Alinhar ao topo"
+                >
+                  <i data-lucide="align-start-horizontal"></i>
+                </button>
+                <button
+                  class="al-btn"
+                  onclick="alignElement('centerV')"
+                  data-tippy-content="Centralizar vertical"
+                >
+                  <i data-lucide="align-center-horizontal"></i>
+                </button>
+                <button
+                  class="al-btn"
+                  onclick="alignElement('bottom')"
+                  data-tippy-content="Alinhar à base"
+                >
+                  <i data-lucide="align-end-horizontal"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grp">
+              <label class="grp-title">Modelos de Texto</label>
+              <div class="preset-grid">
+                <div class="preset-card" onclick="applyPreset('nome')">
+                  <i data-lucide="user"></i>
+                  <div>
+                    <div class="preset-name">Nome do Aluno</div>
+                    <div class="preset-desc">{nome} — centralizado, grande</div>
+                  </div>
+                </div>
+                <div class="preset-card" onclick="applyPreset('curso')">
+                  <i data-lucide="book-open"></i>
+                  <div>
+                    <div class="preset-name">Nome do Curso</div>
+                    <div class="preset-desc">{curso} — centralizado, médio</div>
+                  </div>
+                </div>
+                <div class="preset-card" onclick="applyPreset('data')">
+                  <i data-lucide="calendar"></i>
+                  <div>
+                    <div class="preset-name">Data</div>
+                    <div class="preset-desc">Data atual formatada</div>
+                  </div>
+                </div>
+                <div class="preset-card" onclick="applyPreset('paragrafo')">
+                  <i data-lucide="file-text"></i>
+                  <div>
+                    <div class="preset-name">Parágrafo</div>
+                    <div class="preset-desc">Texto descritivo do certificado</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grp">
+              <label class="grp-title">Fontes Personalizadas</label>
+              <button class="btn-out w100" onclick="uploadFont()">
+                <i data-lucide="upload"></i>Carregar Fonte
+              </button>
+              <div id="font-list" class="items sm"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Imagens ── -->
+        <section class="pane" id="pane-images">
+          <div class="pane-head">
+            <h2><i data-lucide="image"></i>Imagens</h2>
+          </div>
+          <div class="pane-body">
+            <button class="btn-pri w100" onclick="uploadImage()">
+              <i data-lucide="upload"></i>Carregar Imagem
+            </button>
+            <div id="img-gallery" class="img-grid"></div>
+          </div>
+        </section>
+
+        <!-- ── Alunos ── -->
+        <section class="pane" id="pane-students">
+          <div class="pane-head">
+            <h2><i data-lucide="users"></i>Alunos</h2>
+            <span id="stu-count" class="badge">0</span>
+          </div>
+          <div class="pane-body">
+            <div class="row2">
+              <button class="btn-pri f1" onclick="addStudent()">
+                <i data-lucide="user-plus"></i>Novo
+              </button>
+              <button class="btn-out f1" onclick="importCSV()">
+                <i data-lucide="file-spreadsheet"></i>Importar
+              </button>
+            </div>
+            <div class="search">
+              <i data-lucide="search"></i
+              ><input
+                type="text"
+                id="stu-search"
+                placeholder="Buscar aluno..."
+                oninput="filterStudents(this.value)"
+              />
+            </div>
+            <div id="stu-list" class="items"></div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- ═══ WORKSPACE ═══ -->
+      <main class="workspace" id="workspace">
+        <div class="ruler ruler-h" id="ruler-h"><canvas id="ruler-hc"></canvas></div>
+        <div class="ruler ruler-v" id="ruler-v"><canvas id="ruler-vc"></canvas></div>
+        <div class="ruler-corner" id="ruler-corner"></div>
+
+        <div class="viewport" id="viewport">
+          <div class="scroll-area" id="scroll-area" onclick="canvas.deselect()">
+            <div class="grid-overlay hidden" id="grid-overlay"></div>
+            <div id="canvas-wrap" class="canvas-wrap hidden" onclick="event.stopPropagation()">
+              <img id="cert-img" src="" alt="Preview" draggable="false" />
+              <div id="snap-h" class="snap snap-h hidden"></div>
+              <div id="snap-v" class="snap snap-v hidden"></div>
+              <div id="dyn-els"></div>
+            </div>
+            <div id="empty-state" class="empty-state">
+              <i data-lucide="file-text"></i>
+              <h3>Nenhum template selecionado</h3>
+              <p>Selecione ou envie um template PDF para começar</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bottombar">
+          <div class="bb-left">
+            <button class="tb-btn sm" onclick="canvas.undoAction()" title="Desfazer">
+              <i data-lucide="undo-2"></i>
+            </button>
+            <button class="tb-btn sm" onclick="canvas.redoAction()" title="Refazer">
+              <i data-lucide="redo-2"></i>
+            </button>
+          </div>
+          <div class="bb-center">
+            <button class="tb-btn sm" onclick="prevStudent()">
+              <i data-lucide="chevron-left"></i>
+            </button>
+            <span id="stu-nav">Aluno 1 de 1</span>
+            <button class="tb-btn sm" onclick="nextStudent()">
+              <i data-lucide="chevron-right"></i>
+            </button>
+          </div>
+          <div class="bb-right">
+            <span id="cursor-pos" class="info">X: 0 Y: 0</span>
+            <span id="page-info" class="info">841 × 595 pt</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ═══ MODALS ═══ -->
+    <div id="modal-csv" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h3><i data-lucide="file-spreadsheet"></i>Importar Alunos</h3>
+          <button class="tb-btn sm" onclick="closeModal('modal-csv')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="muted">
+            Cole dados CSV (separados por <code>,</code> ou <code>;</code>) — a primeira linha
+            define as colunas.<br />
+            Campos com vírgulas devem estar entre aspas duplas.
+          </p>
+          <textarea
+            id="csv-input"
+            rows="10"
+            placeholder="ALUNO,CURSO&#10;João Silva,Desenvolvimento Web&#10;Maria Santos,Design Gráfico"
+          ></textarea>
+          <div style="margin-top: 8px">
+            <label
+              class="btn-out"
+              style="cursor: pointer; display: inline-flex; align-items: center; gap: 4px"
+            >
+              <i data-lucide="upload" style="width: 14px; height: 14px"></i> Carregar arquivo .csv
+              <input
+                type="file"
+                accept=".csv,.txt"
+                style="display: none"
+                onchange="loadCSVFile(this)"
+              />
+            </label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn-out" onclick="closeModal('modal-csv')">Cancelar</button>
+          <button class="btn-pri" onclick="processCSV()">
+            <i data-lucide="check"></i>Importar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modal-help" class="modal hidden">
+      <div class="modal-card" style="max-width: 520px">
+        <div class="modal-head">
+          <h3><i data-lucide="keyboard"></i>Atalhos</h3>
+          <button class="tb-btn sm" onclick="closeModal('modal-help')">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="sc-grid">
+            <div class="sc"><kbd>Ctrl+S</kbd><span>Salvar</span></div>
+            <div class="sc"><kbd>Ctrl+Z</kbd><span>Desfazer</span></div>
+            <div class="sc"><kbd>Ctrl+Y</kbd><span>Refazer</span></div>
+            <div class="sc"><kbd>Ctrl+D</kbd><span>Duplicar</span></div>
+            <div class="sc"><kbd>Del</kbd><span>Excluir</span></div>
+            <div class="sc"><kbd>Setas</kbd><span>Mover 1pt</span></div>
+            <div class="sc"><kbd>Shift+Seta</kbd><span>Mover 10pt</span></div>
+            <div class="sc"><kbd>Ctrl+0</kbd><span>Zoom fit</span></div>
+            <div class="sc"><kbd>Ctrl++/-</kbd><span>Zoom in/out</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ═══ AUTH GUARD ═══
+      // Block access without login — redirect to /login immediately
+      (function () {
+        const token = localStorage.getItem('cf_token');
+        if (!token) {
+          window.location.replace('/login');
+          // Stop all further script execution
+          throw new Error('AUTH_REDIRECT');
+        }
+      })();
+
+      window.addEventListener('load', () => {
+        if (window.lucide) lucide.createIcons();
+        loadUserInfo();
+      });
+
+      // ═══ User Menu ═══
+      function toggleUserMenu() {
+        const trigger = document.getElementById('user-trigger');
+        const dropdown = document.getElementById('user-dropdown');
+        const isOpen = dropdown.classList.contains('open');
+        trigger.classList.toggle('open', !isOpen);
+        dropdown.classList.toggle('open', !isOpen);
+      }
+
+      // Close on outside click
+      document.addEventListener('click', (e) => {
+        const wrap = document.getElementById('user-menu-wrap');
+        if (wrap && !wrap.contains(e.target)) {
+          document.getElementById('user-trigger').classList.remove('open');
+          document.getElementById('user-dropdown').classList.remove('open');
+        }
+      });
+
+      function getInitials(name) {
+        return name
+          .split(' ')
+          .map((w) => w[0])
+          .join('')
+          .slice(0, 2)
+          .toUpperCase();
+      }
+
+      function loadUserInfo() {
+        const storedUser = localStorage.getItem('cf_user');
+        const token = localStorage.getItem('cf_token');
+
+        if (!token) {
+          window.location.replace('/login');
+          return;
+        }
+
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser);
+            applyUserUI(user);
+          } catch (e) {}
+        }
+
+        // Fetch fresh data from API
+        fetch('/api/auth/me', {
+          headers: { Authorization: 'Bearer ' + token },
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.ok && data.user) {
+              localStorage.setItem('cf_user', JSON.stringify(data.user));
+              applyUserUI(data.user);
+            } else {
+              // Token invalid/expired — force login
+              localStorage.removeItem('cf_token');
+              localStorage.removeItem('cf_user');
+              window.location.replace('/login');
+            }
+          })
+          .catch(() => {
+            // API unavailable — use cached if exists, otherwise redirect
+            if (!storedUser) {
+              window.location.replace('/login');
+            }
+          });
+      }
+
+      function applyUserUI(user) {
+        const initials = getInitials(user.name || 'U');
+        document.getElementById('user-avatar').textContent = initials;
+        document.getElementById('ud-avatar').textContent = initials;
+        document.getElementById('user-name-top').textContent = user.name || 'Usuário';
+        document.getElementById('ud-name').textContent = user.name || 'Usuário';
+        document.getElementById('ud-email').textContent = user.email || '';
+
+        // Plan badge
+        const planSlug = user.plan_slug || user.plan || 'trial';
+        const planNames = { trial: 'Trial', basic: 'Básico', pro: 'Pro', unlimited: 'Ilimitado' };
+        const planBadge = document.getElementById('ud-plan');
+        planBadge.textContent = planNames[planSlug] || planSlug;
+        planBadge.className = 'plan-badge ' + planSlug;
+
+        // Stats
+        document.getElementById('ud-certs').textContent = user.certs_count || '0';
+        document.getElementById('ud-templates').textContent = user.templates_count || '0';
+
+        // Admin button
+        if (user.role === 'admin' || user.role === 'superadmin') {
+          document.getElementById('ud-admin-btn').style.display = '';
+        }
+      }
+
+      function logoutUser() {
+        const token = localStorage.getItem('cf_token');
+        if (token) {
+          fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + token },
+          }).catch(() => {});
+        }
+        localStorage.removeItem('cf_token');
+        localStorage.removeItem('cf_user');
+        window.location.href = '/login';
+      }
+    </script>
+  </body>
+</html>

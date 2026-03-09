@@ -1,0 +1,23 @@
+# Environment
+.env
+
+# Temp/debug files
+_temp_admin.php
+_output.txt
+debug_generate.log
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Vendor (install via composer)
+# backend/vendor/  # Uncomment if you want to install fresh via composer install

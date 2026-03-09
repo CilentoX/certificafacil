@@ -1,0 +1,63 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '80'
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME:-certificafacil}
+      - DB_USER=${DB_USER:-certificafacil}
+      - DB_PASS=${DB_PASS:-certificafacil_secret}
+      - APP_URL=${APP_URL:-https://certificafacil.qwertyatlas.online}
+      - PUBLIC_KEY=${PUBLIC_KEY:-}
+      - ACCESS_TOKEN=${ACCESS_TOKEN:-}
+      - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET:-}
+    volumes:
+      - uploads_data:/var/www/html/uploads
+      - assets_templates:/var/www/html/assets/templates
+      - assets_fonts:/var/www/html/assets/fonts
+      - assets_images:/var/www/html/assets/images
+      - assets_configs:/var/www/html/assets/configs
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root_secret}
+      MYSQL_DATABASE: ${DB_NAME:-certificafacil}
+      MYSQL_USER: ${DB_USER:-certificafacil}
+      MYSQL_PASSWORD: ${DB_PASS:-certificafacil_secret}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p${DB_ROOT_PASS:-root_secret}',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  db_data:
+  uploads_data:
+  assets_templates:
+  assets_fonts:
+  assets_images:
+  assets_configs:

@@ -1,0 +1,2152 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>CertificaFacil — Gerador de certificados</title>
+    <meta
+      name="description"
+      content="Gere certificados em lote de forma rápida e visual. Importe PDF, suba sua lista de nomes e baixe tudo pronto."
+    />
+    <meta
+      name="keywords"
+      content="certificados, gerador de certificados, certificados em lote, PDF, editor visual"
+    />
+    <meta property="og:title" content="CertificaFacil — Gerador de certificados" />
+    <meta
+      property="og:description"
+      content="Gere certificados em lote sem complicação. Editor visual, fontes customizadas e geração em lote."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --accent: #4f46e5;
+        --accent-hover: #6366f1;
+        --accent-bg: #eef2ff;
+        --accent-rgb: 79, 70, 229;
+      }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        color: #1a1a1a;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      /* ── NAV ─────────────────────────────── */
+      .navbar {
+        backdrop-filter: blur(16px);
+        background: rgba(255, 255, 255, 0.88) !important;
+        border-bottom: 1px solid #eee;
+        transition: box-shadow 0.3s;
+      }
+      .navbar.scrolled {
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+      }
+      .navbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .navbar-brand img {
+        height: 32px;
+        width: auto;
+      }
+      .nav-link {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #555 !important;
+        transition: color 0.15s;
+      }
+      .nav-link:hover {
+        color: #1a1a1a !important;
+      }
+      .btn-nav-primary {
+        background: var(--accent);
+        color: #fff !important;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        transition:
+          background 0.15s,
+          transform 0.15s;
+      }
+      .btn-nav-primary:hover {
+        background: var(--accent-hover);
+        color: #fff !important;
+        transform: translateY(-1px);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      /* ── HERO ─────────────────────────────── */
+      .hero-section {
+        padding: 120px 0 80px;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%);
+      }
+      .hero-row {
+        display: flex;
+        align-items: center;
+        gap: 60px;
+      }
+      .hero-text {
+        flex: 1;
+        text-align: left;
+      }
+      .hero-visual {
+        flex: 0 0 420px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .hero-character {
+        width: 100%;
+        max-width: 420px;
+        height: auto;
+        animation: hero-float 4s ease-in-out infinite;
+        filter: drop-shadow(0 24px 48px rgba(79, 70, 229, 0.22));
+        transform: scaleX(-1);
+      }
+      @keyframes hero-float {
+        0%,
+        100% {
+          transform: scaleX(-1) translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: scaleX(-1) translateY(-20px) rotate(1deg);
+        }
+      }
+      .hero-visual::before {
+        content: '';
+        position: absolute;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(var(--accent-rgb), 0.1) 0%, transparent 70%);
+        z-index: -1;
+        animation: hero-glow 6s ease-in-out infinite alternate;
+      }
+      .hero-visual::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        width: 200px;
+        height: 30px;
+        background: radial-gradient(ellipse, rgba(0, 0, 0, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: hero-shadow 4s ease-in-out infinite;
+      }
+      @keyframes hero-shadow {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: scale(0.85);
+          opacity: 0.4;
+        }
+      }
+      .hero-highlight {
+        background: linear-gradient(135deg, var(--accent), #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero-stats {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid #eee;
+      }
+      .hero-stat {
+        text-align: left;
+      }
+      .hero-stat-val {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #1a1a1a;
+        line-height: 1;
+      }
+      .hero-stat-label {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 4px;
+      }
+      .hero-stat-sep {
+        width: 1px;
+        height: 32px;
+        background: #e0e0e0;
+      }
+      @media (max-width: 768px) {
+        .hero-row {
+          flex-direction: column-reverse;
+          text-align: center;
+          gap: 32px;
+        }
+        .hero-text {
+          text-align: center;
+        }
+        .hero-visual {
+          flex: 0 0 auto;
+          max-width: 280px;
+        }
+        .hero-stats {
+          justify-content: center;
+        }
+      }
+      .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -120px;
+        right: -120px;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(var(--accent-rgb), 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: hero-glow 6s ease-in-out infinite alternate;
+      }
+      .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -80px;
+        left: -80px;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: hero-glow 8s ease-in-out 1s infinite alternate;
+      }
+      @keyframes hero-glow {
+        0% {
+          transform: scale(1) translate(0, 0);
+          opacity: 0.7;
+        }
+        100% {
+          transform: scale(1.15) translate(10px, -10px);
+          opacity: 1;
+        }
+      }
+      /* Floating particles */
+      .hero-particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .hero-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        opacity: 0;
+        animation: float-particle linear infinite;
+      }
+      @keyframes float-particle {
+        0% {
+          opacity: 0;
+          transform: translateY(100vh) scale(0);
+        }
+        10% {
+          opacity: 0.15;
+        }
+        90% {
+          opacity: 0.15;
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-20px) scale(1);
+        }
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        background: var(--accent-bg);
+        color: var(--accent);
+        border-radius: 24px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 24px;
+        animation: badge-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+      }
+      @keyframes badge-pop {
+        0% {
+          opacity: 0;
+          transform: scale(0.8) translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      .hero-section h1 {
+        font-size: clamp(2.2rem, 5vw, 3.2rem);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -0.8px;
+        max-width: 580px;
+        margin: 0 0 20px;
+        color: #111;
+      }
+      .hero-section .lead {
+        color: #555;
+        font-size: 1.1rem;
+        max-width: 480px;
+        margin: 0 0 32px;
+        line-height: 1.6;
+      }
+      .hero-note {
+        margin-top: 14px;
+        font-size: 0.78rem;
+        color: #999;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .hero-note i {
+        font-size: 0.85rem;
+        color: #22c55e;
+      }
+      .btn-accent {
+        background: linear-gradient(135deg, var(--accent), #6366f1);
+        color: #fff;
+        font-weight: 600;
+        padding: 14px 30px;
+        border-radius: 12px;
+        border: none;
+        font-size: 1rem;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.2);
+      }
+      .btn-accent:hover {
+        background: linear-gradient(135deg, var(--accent-hover), #818cf8);
+        color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.3);
+      }
+      .btn-accent-outline {
+        background: #fff;
+        color: var(--accent);
+        font-weight: 600;
+        padding: 14px 30px;
+        border-radius: 12px;
+        border: 1.5px solid #e0e0e0;
+        font-size: 1rem;
+        transition: all 0.25s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-accent-outline:hover {
+        background: var(--accent-bg);
+        color: var(--accent);
+        transform: translateY(-2px);
+      }
+
+      /* ── DEMO FRAME ──────────────────────── */
+      .demo-section {
+        padding-bottom: 80px;
+      }
+      .demo-frame {
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #0d0d0d;
+        position: relative;
+      }
+      .demo-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        background: #1a1a1a;
+        border-bottom: 1px solid #2a2a2a;
+      }
+      .demo-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .demo-dot.r {
+        background: #ff5f57;
+      }
+      .demo-dot.y {
+        background: #febc2e;
+      }
+      .demo-dot.g {
+        background: #28c840;
+      }
+      .demo-bar span {
+        flex: 1;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #666;
+        margin-right: 40px;
+      }
+      .demo-body {
+        display: grid;
+        grid-template-columns: 56px 220px 1fr;
+        height: 380px;
+      }
+      .demo-sidebar {
+        background: #111;
+        border-right: 1px solid #222;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 14px 0;
+        gap: 16px;
+      }
+      .demo-sidebar i {
+        color: #555;
+        font-size: 18px;
+      }
+      .demo-panel {
+        background: #161616;
+        border-right: 1px solid #222;
+        padding: 16px;
+        overflow: hidden;
+      }
+      .demo-panel-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #555;
+        margin-bottom: 12px;
+      }
+      .demo-field {
+        background: #222;
+        border-radius: 6px;
+        height: 32px;
+        margin-bottom: 8px;
+      }
+      .demo-field.short {
+        width: 60%;
+      }
+      .demo-canvas {
+        background: #0a0a0a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .demo-cert {
+        width: 70%;
+        aspect-ratio: 1.414;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+        border-radius: 6px;
+        border: 1px solid #4338ca44;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+      }
+      .demo-cert .cert-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #a5b4fc;
+      }
+      .demo-cert .cert-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e0e7ff;
+        padding: 4px 16px;
+        border: 1px dashed #6366f166;
+        border-radius: 4px;
+        position: relative;
+        min-width: 120px;
+        text-align: center;
+        transition: border-color 0.3s;
+      }
+      .demo-cert .cert-name.selected {
+        border-color: #6366f1;
+        box-shadow:
+          0 0 0 1px #6366f1,
+          0 0 12px rgba(99, 102, 241, 0.25);
+      }
+      .demo-cert .cert-name .typing-cursor {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background: #a5b4fc;
+        margin-left: 1px;
+        vertical-align: text-bottom;
+        animation: cursor-blink 0.7s step-end infinite;
+      }
+      @keyframes cursor-blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+      .demo-cert .cert-line {
+        width: 40%;
+        height: 2px;
+        background: #4338ca55;
+        border-radius: 2px;
+      }
+      .demo-cert .cert-date {
+        font-size: 0.5rem;
+        color: #818cf8;
+        opacity: 0;
+        transition: opacity 0.4s;
+        margin-top: 2px;
+      }
+      .demo-cert .cert-date.show {
+        opacity: 1;
+      }
+
+      /* Sidebar animation */
+      .demo-sidebar i {
+        transition:
+          color 0.25s,
+          transform 0.25s,
+          background 0.25s;
+        padding: 6px;
+        border-radius: 6px;
+        cursor: default;
+      }
+      .demo-sidebar i.active {
+        color: #a5b4fc;
+        background: rgba(99, 102, 241, 0.15);
+        transform: scale(1.15);
+      }
+
+      /* Panel animation */
+      .demo-field {
+        transition:
+          background 0.3s,
+          box-shadow 0.3s,
+          transform 0.15s;
+      }
+      .demo-field.pulse {
+        background: #333;
+        box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
+        transform: scaleX(1.02);
+      }
+      .demo-field.filled {
+        background: linear-gradient(90deg, #2d2b6b, #222);
+        position: relative;
+        overflow: hidden;
+      }
+      .demo-field.filled::after {
+        content: '';
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40%;
+        height: 8px;
+        background: #4338ca55;
+        border-radius: 3px;
+      }
+
+      /* Canvas resize handles */
+      .demo-cert .resize-handle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #6366f1;
+        border-radius: 1px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .demo-cert.editing .resize-handle {
+        opacity: 1;
+      }
+      .demo-cert .resize-handle.tl {
+        top: -3px;
+        left: -3px;
+      }
+      .demo-cert .resize-handle.tr {
+        top: -3px;
+        right: -3px;
+      }
+      .demo-cert .resize-handle.bl {
+        bottom: -3px;
+        left: -3px;
+      }
+      .demo-cert .resize-handle.br {
+        bottom: -3px;
+        right: -3px;
+      }
+
+      /* Mini-tooltip in demo */
+      .demo-tooltip {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #1e1b4b;
+        border: 1px solid #4338ca;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.55rem;
+        color: #a5b4fc;
+        opacity: 0;
+        transform: translateY(-4px);
+        transition:
+          opacity 0.3s,
+          transform 0.3s;
+        white-space: nowrap;
+      }
+      .demo-tooltip.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Layer entries */
+      .demo-layer {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 8px;
+        border-radius: 4px;
+        font-size: 0.6rem;
+        color: #888;
+        background: transparent;
+        transition:
+          background 0.25s,
+          color 0.25s;
+        margin-bottom: 3px;
+      }
+      .demo-layer .layer-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #444;
+        transition: background 0.25s;
+      }
+      .demo-layer.active {
+        background: rgba(99, 102, 241, 0.1);
+        color: #c7d2fe;
+      }
+      .demo-layer.active .layer-dot {
+        background: #6366f1;
+      }
+
+      /* Demo mini-toolbar */
+      .demo-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 16px;
+        background: #141414;
+        border-bottom: 1px solid #222;
+      }
+      .dtb-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      .dtb-btn {
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        color: #555;
+        font-size: 12px;
+        transition: all 0.25s;
+        cursor: default;
+      }
+      .dtb-btn.active {
+        color: #a5b4fc;
+        background: rgba(99, 102, 241, 0.15);
+      }
+      .dtb-divider {
+        width: 1px;
+        height: 18px;
+        background: #2a2a2a;
+        margin: 0 6px;
+      }
+      .dtb-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 2px solid #333;
+        transition: all 0.3s;
+        display: inline-block;
+      }
+      .dtb-font,
+      .dtb-size {
+        font-size: 0.6rem;
+        color: #666;
+        padding: 2px 6px;
+        background: #1a1a1a;
+        border-radius: 3px;
+        border: 1px solid #2a2a2a;
+        transition: all 0.3s;
+      }
+      .dtb-font.highlight,
+      .dtb-size.highlight {
+        color: #a5b4fc;
+        border-color: #4338ca;
+      }
+
+      /* Demo status bar */
+      .demo-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 16px;
+        background: #111;
+        border-top: 1px solid #222;
+        font-size: 0.6rem;
+        color: #555;
+      }
+      .ds-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .ds-sep {
+        color: #333;
+      }
+      .ds-left {
+        transition: color 0.3s;
+      }
+      .ds-left.active {
+        color: #a5b4fc;
+      }
+
+      /* Demo alignment guides */
+      .align-guide-h,
+      .align-guide-v {
+        position: absolute;
+        background: #6366f1;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 5;
+        pointer-events: none;
+      }
+      .align-guide-h {
+        width: 100%;
+        height: 1px;
+        left: 0;
+        top: 50%;
+      }
+      .align-guide-v {
+        width: 1px;
+        height: 100%;
+        top: 0;
+        left: 50%;
+      }
+      .align-guide-h.show,
+      .align-guide-v.show {
+        opacity: 0.6;
+      }
+
+      /* Batch generation overlay */
+      .demo-batch {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(15, 15, 25, 0.95);
+        border: 1px solid #4338ca;
+        border-radius: 10px;
+        padding: 20px 28px;
+        text-align: center;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.4s;
+        pointer-events: none;
+      }
+      .demo-batch.show {
+        opacity: 1;
+      }
+      .batch-title {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #c7d2fe;
+        margin-bottom: 10px;
+      }
+      .batch-title i {
+        color: #818cf8;
+      }
+      .batch-progress {
+        width: 160px;
+        height: 6px;
+        background: #1e1b4b;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 6px;
+      }
+      .batch-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #6366f1, #818cf8);
+        border-radius: 3px;
+        transition: width 0.15s linear;
+      }
+      .batch-count {
+        font-size: 0.6rem;
+        color: #818cf8;
+        font-weight: 600;
+      }
+
+      /* Color dots in panel */
+      .demo-colors {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 8px;
+        margin-top: 4px;
+      }
+      .demo-color-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+        cursor: default;
+      }
+      .demo-color-dot.active {
+        border-color: #fff;
+        transform: scale(1.2);
+      }
+
+      @keyframes blink-border {
+        0%,
+        100% {
+          border-color: #6366f166;
+        }
+        50% {
+          border-color: #6366f1;
+        }
+      }
+      @media (max-width: 768px) {
+        .demo-body {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+        .demo-sidebar,
+        .demo-panel {
+          display: none;
+        }
+        .demo-toolbar,
+        .demo-status {
+          display: none;
+        }
+        .demo-canvas {
+          min-height: 220px;
+        }
+      }
+
+      /* ── FEATURES ────────────────────────── */
+      .features-section {
+        padding: 80px 0;
+      }
+      .section-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .section-title {
+        font-size: 1.75rem;
+        font-weight: 800;
+        letter-spacing: -0.3px;
+        margin-bottom: 48px;
+      }
+      .feat-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 28px;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+      .feat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+      }
+      .feat-card:hover::before {
+        transform: scaleX(1);
+      }
+      .feat-card:hover {
+        border-color: #ddd;
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+      }
+      .feat-icon-wrap {
+        width: 48px;
+        height: 48px;
+        background: var(--accent-bg);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        color: var(--accent);
+        font-size: 1.3rem;
+        transition:
+          transform 0.3s,
+          background 0.3s;
+      }
+      .feat-card:hover .feat-icon-wrap {
+        transform: scale(1.1) rotate(-5deg);
+        background: var(--accent);
+        color: #fff;
+      }
+      .feat-card h4 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .feat-card p {
+        font-size: 0.875rem;
+        color: #666;
+        line-height: 1.55;
+        margin: 0;
+      }
+
+      /* ── STEPS ────────────────────────────── */
+      .steps-section {
+        background: #fafafa;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        padding: 80px 0;
+      }
+      .steps-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0;
+        position: relative;
+      }
+      .step-card {
+        text-align: center;
+        flex: 0 0 220px;
+        max-width: 220px;
+        position: relative;
+        z-index: 2;
+      }
+      .step-icon-wrap {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        color: #fff;
+        font-size: 1.6rem;
+        position: relative;
+        transition:
+          transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.3s;
+        box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.2);
+      }
+      .step-card:hover .step-icon-wrap {
+        transform: translateY(-6px) scale(1.05);
+        box-shadow: 0 16px 40px rgba(var(--accent-rgb), 0.3);
+      }
+      .step-num-badge {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 24px;
+        height: 24px;
+        background: #fff;
+        color: var(--accent);
+        border-radius: 50%;
+        font-size: 0.7rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .step-card h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .step-card p {
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.5;
+      }
+      /* Connector line between steps */
+      .step-connector {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 34px;
+        min-width: 60px;
+        position: relative;
+      }
+      .step-connector-line {
+        height: 2px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+        border-radius: 2px;
+        position: relative;
+        overflow: hidden;
+      }
+      .step-connector-line::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+        animation: line-shimmer 2.5s ease-in-out infinite;
+      }
+      @keyframes line-shimmer {
+        0% {
+          left: -100%;
+        }
+        100% {
+          left: 200%;
+        }
+      }
+      .step-connector-dot {
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: var(--accent);
+        border-radius: 50%;
+      }
+      @media (max-width: 768px) {
+        .steps-row {
+          flex-direction: column;
+          align-items: center;
+          gap: 24px;
+        }
+        .step-connector {
+          display: none;
+        }
+        .step-card {
+          flex: none;
+          max-width: 300px;
+        }
+      }
+
+      /* ── STAGGER ANIMATIONS ──────────────── */
+      .fade-up-d1 {
+        transition-delay: 0.1s;
+      }
+      .fade-up-d2 {
+        transition-delay: 0.2s;
+      }
+      .fade-up-d3 {
+        transition-delay: 0.3s;
+      }
+      .fade-up-d4 {
+        transition-delay: 0.4s;
+      }
+      .fade-up-d5 {
+        transition-delay: 0.5s;
+      }
+      .fade-up-d6 {
+        transition-delay: 0.6s;
+      }
+      .fade-up-d7 {
+        transition-delay: 0.7s;
+      }
+      .fade-up-d8 {
+        transition-delay: 0.8s;
+      }
+      .fade-up-d9 {
+        transition-delay: 0.9s;
+      }
+
+      /* ── PRICING ──────────────────────────── */
+      .pricing-section {
+        padding: 80px 0;
+      }
+      .price-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 32px 28px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+      }
+      .price-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+      }
+      .price-card.featured {
+        border-color: var(--accent);
+        box-shadow:
+          0 0 0 1px var(--accent),
+          0 8px 24px rgba(var(--accent-rgb), 0.1);
+      }
+      .price-card.featured:hover {
+        transform: translateY(-6px);
+        box-shadow:
+          0 0 0 1px var(--accent),
+          0 16px 40px rgba(var(--accent-rgb), 0.15);
+      }
+      .price-tag {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        margin-bottom: 4px;
+        min-height: 16px;
+      }
+      .price-card h4 {
+        font-size: 1.15rem;
+        font-weight: 800;
+      }
+      .price-amount {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 10px 0 4px;
+        letter-spacing: -0.5px;
+      }
+      .price-amount small {
+        font-size: 0.85rem;
+        font-weight: 400;
+        color: #999;
+      }
+      .price-desc {
+        font-size: 0.8rem;
+        color: #999;
+        margin-bottom: 20px;
+      }
+      .price-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 24px;
+        flex: 1;
+      }
+      .price-card li {
+        font-size: 0.85rem;
+        color: #555;
+        padding: 5px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .price-card li i {
+        color: var(--accent);
+        font-size: 0.85rem;
+      }
+      .price-card .btn {
+        width: 100%;
+      }
+
+      /* ── CTA ──────────────────────────────── */
+      .cta-section {
+        padding: 80px 0;
+        text-align: center;
+        background: linear-gradient(180deg, #fff 0%, #f5f3ff 100%);
+        position: relative;
+        overflow: hidden;
+      }
+      .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        translate: -50% -50%;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(var(--accent-rgb), 0.06) 0%, transparent 60%);
+        pointer-events: none;
+        animation: cta-pulse 4s ease-in-out infinite;
+      }
+      @keyframes cta-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+      }
+      .cta-section h2 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 12px;
+        position: relative;
+      }
+      .cta-section p {
+        color: #666;
+        margin-bottom: 28px;
+        position: relative;
+      }
+      .cta-section .btn-accent {
+        position: relative;
+        animation: cta-btn-glow 3s ease-in-out infinite;
+      }
+      @keyframes cta-btn-glow {
+        0%,
+        100% {
+          box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.2);
+        }
+        50% {
+          box-shadow: 0 8px 40px rgba(var(--accent-rgb), 0.4);
+        }
+      }
+
+      /* ── FOOTER ───────────────────────────── */
+      .footer-section {
+        border-top: 1px solid #eee;
+        padding: 28px 0;
+        font-size: 0.8rem;
+        color: #aaa;
+      }
+      .footer-section a {
+        color: #999;
+        transition: color 0.15s;
+      }
+      .footer-section a:hover {
+        color: #555;
+      }
+
+      /* ── SCROLL ANIMATIONS ───────────────── */
+      .fade-up {
+        opacity: 0;
+        transform: translateY(40px);
+        transition:
+          opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .fade-left {
+        opacity: 0;
+        transform: translateX(-40px);
+        transition:
+          opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .fade-left.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .fade-scale {
+        opacity: 0;
+        transform: scale(0.9);
+        transition:
+          opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .fade-scale.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* Counter animation */
+      .counter-val {
+        display: inline-block;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="/"><img src="/assets/logo.svg" alt="CertificaFacil" /></a>
+        <button
+          class="navbar-toggler border-0"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navCollapse"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navCollapse">
+          <ul class="navbar-nav align-items-center gap-1">
+            <li class="nav-item">
+              <a class="nav-link px-3" href="#funcionalidades">Funcionalidades</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link px-3" href="#como-funciona">Como funciona</a>
+            </li>
+            <li class="nav-item"><a class="nav-link px-3" href="#planos">Planos</a></li>
+            <li class="nav-item ms-2"><a class="nav-link px-3" href="/login">Entrar</a></li>
+            <li class="nav-item ms-1">
+              <a class="btn-nav-primary" href="/register">Criar conta</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero-section">
+      <div class="hero-particles" id="hero-particles"></div>
+      <div class="container">
+        <div class="hero-row">
+          <div class="hero-text fade-up">
+            <div class="hero-badge">
+              <i class="bi bi-lightning-charge-fill"></i> 7 dias grátis para testar
+            </div>
+            <h1>Certificados em lote, <span class="hero-highlight">sem complicação</span></h1>
+            <p class="lead">
+              Importe seu modelo em PDF, suba a lista de nomes via CSV e baixe todos os certificados
+              prontos em segundos.
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+              <a href="/register" class="btn-accent"
+                ><i class="bi bi-rocket-takeoff"></i> Começar grátis</a
+              >
+              <a href="#como-funciona" class="btn-accent-outline"
+                ><i class="bi bi-play-circle"></i> Ver como funciona</a
+              >
+            </div>
+            <p class="hero-note">
+              <i class="bi bi-shield-check"></i> Sem cartão de crédito. Cancele quando quiser.
+            </p>
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <div class="hero-stat-val">10k+</div>
+                <div class="hero-stat-label">Certificados gerados</div>
+              </div>
+              <div class="hero-stat-sep"></div>
+              <div class="hero-stat">
+                <div class="hero-stat-val">500+</div>
+                <div class="hero-stat-label">Usuários ativos</div>
+              </div>
+              <div class="hero-stat-sep"></div>
+              <div class="hero-stat">
+                <div class="hero-stat-val">4.9★</div>
+                <div class="hero-stat-label">Avaliação média</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-visual fade-up">
+            <img
+              src="/assets/images/hero-character.png"
+              alt="Pessoa usando o CertificaFacil"
+              class="hero-character"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="demo-section">
+      <div class="container" style="max-width: 920px">
+        <div class="demo-frame fade-up" id="demo-editor">
+          <div class="demo-bar">
+            <div class="demo-dot r"></div>
+            <div class="demo-dot y"></div>
+            <div class="demo-dot g"></div>
+            <span>CertificaFacil — Editor</span>
+          </div>
+          <!-- Mini toolbar -->
+          <div class="demo-toolbar" id="demo-toolbar">
+            <div class="dtb-group">
+              <span class="dtb-btn" id="dtb-bold"><i class="bi bi-type-bold"></i></span>
+              <span class="dtb-btn" id="dtb-italic"><i class="bi bi-type-italic"></i></span>
+              <span class="dtb-btn" id="dtb-underline"><i class="bi bi-type-underline"></i></span>
+            </div>
+            <div class="dtb-divider"></div>
+            <div class="dtb-group">
+              <span class="dtb-btn" id="dtb-align-l"><i class="bi bi-text-left"></i></span>
+              <span class="dtb-btn active" id="dtb-align-c"><i class="bi bi-text-center"></i></span>
+              <span class="dtb-btn" id="dtb-align-r"><i class="bi bi-text-right"></i></span>
+            </div>
+            <div class="dtb-divider"></div>
+            <div class="dtb-group">
+              <span class="dtb-color" id="dtb-color" style="background: #a5b4fc"></span>
+              <span class="dtb-font" id="dtb-font">Inter</span>
+              <span class="dtb-size" id="dtb-size">24px</span>
+            </div>
+          </div>
+          <div class="demo-body">
+            <div class="demo-sidebar" id="demo-sidebar">
+              <i class="bi bi-cursor" id="ds-cursor"></i>
+              <i class="bi bi-fonts" id="ds-fonts"></i>
+              <i class="bi bi-image" id="ds-image"></i>
+              <i class="bi bi-layers" id="ds-layers"></i>
+              <i class="bi bi-sliders" id="ds-settings"></i>
+            </div>
+            <div class="demo-panel" id="demo-panel">
+              <div class="demo-panel-title" id="dp-title">Propriedades</div>
+              <div class="demo-field" id="df-1"></div>
+              <div class="demo-field short" id="df-2"></div>
+              <div class="demo-field" id="df-3"></div>
+              <div class="demo-field short" id="df-4"></div>
+              <div class="demo-field" id="df-5"></div>
+              <div class="demo-colors" id="demo-colors">
+                <span class="demo-color-dot active" style="background: #a5b4fc"></span>
+                <span class="demo-color-dot" style="background: #818cf8"></span>
+                <span class="demo-color-dot" style="background: #f472b6"></span>
+                <span class="demo-color-dot" style="background: #34d399"></span>
+                <span class="demo-color-dot" style="background: #fbbf24"></span>
+              </div>
+              <div style="height: 12px"></div>
+              <div class="demo-panel-title">Camadas</div>
+              <div class="demo-layer active" id="dl-1"><span class="layer-dot"></span> Título</div>
+              <div class="demo-layer" id="dl-2"><span class="layer-dot"></span> {nome}</div>
+              <div class="demo-layer" id="dl-3" style="opacity: 0; transition: opacity 0.4s">
+                <span class="layer-dot"></span> Data
+              </div>
+            </div>
+            <div class="demo-canvas">
+              <div class="demo-cert" id="demo-cert">
+                <div class="resize-handle tl"></div>
+                <div class="resize-handle tr"></div>
+                <div class="resize-handle bl"></div>
+                <div class="resize-handle br"></div>
+                <div class="demo-tooltip" id="demo-tip">X: 245 Y: 182</div>
+                <div class="cert-title">Certificado de conclusão</div>
+                <div class="cert-name" id="cert-name-el">{nome}</div>
+                <div class="cert-line"></div>
+                <div class="cert-date" id="cert-date-el">02 de Março de 2026</div>
+              </div>
+              <!-- Alignment guides -->
+              <div class="align-guide-h" id="guide-h"></div>
+              <div class="align-guide-v" id="guide-v"></div>
+              <!-- Batch generation overlay -->
+              <div class="demo-batch" id="demo-batch">
+                <div class="batch-title">
+                  <i class="bi bi-lightning-charge-fill"></i> Gerando certificados
+                </div>
+                <div class="batch-progress"><div class="batch-bar" id="batch-bar"></div></div>
+                <div class="batch-count" id="batch-count">0 / 50</div>
+              </div>
+            </div>
+          </div>
+          <!-- Status bar -->
+          <div class="demo-status" id="demo-status">
+            <span class="ds-left" id="ds-status-text">Pronto</span>
+            <span class="ds-right">
+              <span id="ds-zoom">100%</span>
+              <span class="ds-sep">|</span>
+              <span id="ds-layers-count">2 camadas</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features-section" id="funcionalidades">
+      <div class="container">
+        <div class="text-center fade-up">
+          <div class="section-eyebrow">Funcionalidades</div>
+          <h2 class="section-title">O que o CertificaFacil faz</h2>
+        </div>
+        <div class="row g-4">
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-file-earmark-pdf"></i></div>
+              <h4>Modelo em PDF</h4>
+              <p>
+                Use qualquer certificado em PDF como template. O layout que você já tem funciona
+                aqui.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-filetype-csv"></i></div>
+              <h4>Lista via CSV</h4>
+              <p>Importe uma planilha com os nomes dos participantes e gere tudo de uma vez.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-hand-index"></i></div>
+              <h4>Editor visual</h4>
+              <p>
+                Posicione textos, ajuste fontes, cores e tamanhos direto no navegador — arraste e
+                solte.
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-collection"></i></div>
+              <h4>Geração em lote</h4>
+              <p>Centenas de certificados gerados de uma vez. Baixe todos em um ZIP.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-type"></i></div>
+              <h4>Fontes customizadas</h4>
+              <p>Faça upload das suas fontes .ttf / .otf e use nos certificados.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-floppy"></i></div>
+              <h4>Salvar configuração</h4>
+              <p>Salve e reutilize layouts. Não precisa refazer o posicionamento toda vez.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-download"></i></div>
+              <h4>Download em PDF</h4>
+              <p>Certificados gerados em PDF de alta qualidade, prontos para imprimir ou enviar.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-headset"></i></div>
+              <h4>Suporte prioritário</h4>
+              <p>Planos pagos contam com suporte dedicado para tirar suas dúvidas rapidamente.</p>
+            </div>
+          </div>
+          <div class="col-md-4 fade-up">
+            <div class="feat-card">
+              <div class="feat-icon-wrap"><i class="bi bi-shield-check"></i></div>
+              <h4>Dados seguros</h4>
+              <p>Seus dados e certificados ficam protegidos com autenticação e criptografia.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Steps -->
+    <section class="steps-section" id="como-funciona">
+      <div class="container">
+        <div class="text-center fade-up">
+          <div class="section-eyebrow">Como funciona</div>
+          <h2 class="section-title">3 passos para seus certificados</h2>
+        </div>
+        <div class="steps-row">
+          <div class="step-card fade-up fade-up-d1">
+            <div class="step-icon-wrap">
+              <span class="step-num-badge">1</span>
+              <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+            <h4>Suba o modelo</h4>
+            <p>Envie o PDF do certificado que vai servir como base para todos.</p>
+          </div>
+          <div class="step-connector fade-up fade-up-d2">
+            <div class="step-connector-line">
+              <div class="step-connector-dot"></div>
+            </div>
+          </div>
+          <div class="step-card fade-up fade-up-d3">
+            <div class="step-icon-wrap">
+              <span class="step-num-badge">2</span>
+              <i class="bi bi-sliders2"></i>
+            </div>
+            <h4>Configure os campos</h4>
+            <p>Posicione textos, ajuste fontes e cores no editor visual — tudo no navegador.</p>
+          </div>
+          <div class="step-connector fade-up fade-up-d4">
+            <div class="step-connector-line">
+              <div class="step-connector-dot"></div>
+            </div>
+          </div>
+          <div class="step-card fade-up fade-up-d5">
+            <div class="step-icon-wrap">
+              <span class="step-num-badge">3</span>
+              <i class="bi bi-download"></i>
+            </div>
+            <h4>Gere e baixe</h4>
+            <p>Importe a lista de nomes via CSV e baixe todos os PDFs de uma vez.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing-section" id="planos">
+      <div class="container">
+        <div class="text-center fade-up">
+          <div class="section-eyebrow">Planos</div>
+          <h2 class="section-title">Escolha o que faz sentido pra você</h2>
+        </div>
+        <div class="row g-4 justify-content-center fade-up">
+          <div class="col-lg-3 col-md-6">
+            <div class="price-card">
+              <div class="price-tag">Grátis</div>
+              <h4>Trial</h4>
+              <div class="price-amount">R$ 0 <small>/ 7 dias</small></div>
+              <p class="price-desc">Para experimentar a ferramenta</p>
+              <ul>
+                <li><i class="bi bi-check-lg"></i> Até 5 certificados</li>
+                <li><i class="bi bi-check-lg"></i> 2 templates</li>
+                <li><i class="bi bi-check-lg"></i> Editor visual</li>
+                <li><i class="bi bi-check-lg"></i> Importação CSV</li>
+                <li><i class="bi bi-check-lg"></i> Download em PDF</li>
+              </ul>
+              <a href="/register" class="btn btn-accent-outline">Começar grátis</a>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="price-card">
+              <div class="price-tag">&nbsp;</div>
+              <h4>Básico</h4>
+              <div class="price-amount">R$ 29,90 <small>/mês</small></div>
+              <p class="price-desc">Para uso regular</p>
+              <ul>
+                <li><i class="bi bi-check-lg"></i> Até 25 certificados</li>
+                <li><i class="bi bi-check-lg"></i> 5 templates</li>
+                <li><i class="bi bi-check-lg"></i> Geração em lote</li>
+                <li><i class="bi bi-check-lg"></i> Editor visual</li>
+                <li><i class="bi bi-check-lg"></i> Importação CSV</li>
+                <li><i class="bi bi-check-lg"></i> Salvar configurações</li>
+              </ul>
+              <a
+                href="/settings?section=plan"
+                class="btn btn-accent-outline"
+                onclick="return checkAuthForPlan(event);"
+                >Assinar agora</a
+              >
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="price-card featured">
+              <div class="price-tag">Mais popular</div>
+              <h4>Profissional</h4>
+              <div class="price-amount">R$ 59,90 <small>/mês</small></div>
+              <p class="price-desc">Para quem gera bastante</p>
+              <ul>
+                <li><i class="bi bi-check-lg"></i> Até 50 certificados</li>
+                <li><i class="bi bi-check-lg"></i> 20 templates</li>
+                <li><i class="bi bi-check-lg"></i> Fontes customizadas</li>
+                <li><i class="bi bi-check-lg"></i> Geração em lote</li>
+                <li><i class="bi bi-check-lg"></i> Salvar configurações</li>
+                <li><i class="bi bi-check-lg"></i> Suporte prioritário</li>
+              </ul>
+              <a
+                href="/settings?section=plan"
+                class="btn btn-accent"
+                onclick="return checkAuthForPlan(event);"
+                >Assinar agora</a
+              >
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6">
+            <div class="price-card">
+              <div class="price-tag">&nbsp;</div>
+              <h4>Ilimitado</h4>
+              <div class="price-amount">R$ 99,90 <small>/mês</small></div>
+              <p class="price-desc">Sem limites</p>
+              <ul>
+                <li><i class="bi bi-check-lg"></i> Certificados ilimitados</li>
+                <li><i class="bi bi-check-lg"></i> Templates ilimitados</li>
+                <li><i class="bi bi-check-lg"></i> Fontes customizadas</li>
+                <li><i class="bi bi-check-lg"></i> Geração em lote</li>
+                <li><i class="bi bi-check-lg"></i> Salvar configurações</li>
+                <li><i class="bi bi-check-lg"></i> Suporte prioritário</li>
+              </ul>
+              <a
+                href="/settings?section=plan"
+                class="btn btn-accent-outline"
+                onclick="return checkAuthForPlan(event);"
+                >Assinar agora</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section fade-up">
+      <div class="container">
+        <h2>Pronto para gerar seus certificados?</h2>
+        <p>Crie sua conta em segundos e comece agora mesmo.</p>
+        <a href="/register" class="btn-accent">Criar conta grátis</a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section">
+      <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>&copy; 2025 CertificaFacil</span>
+        <div class="d-flex gap-4">
+          <a href="#">Termos</a>
+          <a href="#">Privacidade</a>
+          <a href="mailto:contato@certificafacil.com">Contato</a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // If logged in, redirect paid plan buttons to /settings?section=plan; otherwise to /register
+      function checkAuthForPlan(event) {
+        const token = localStorage.getItem('cf_token');
+        if (!token) {
+          event.preventDefault();
+          window.location.href = '/register';
+          return false;
+        }
+        // Token exists, allow default navigation to /settings?section=plan
+        return true;
+      }
+
+      // Navbar scroll shadow
+      window.addEventListener('scroll', () => {
+        document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 10);
+      });
+
+      // Scroll fade-up animation
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+            }
+          });
+        },
+        { threshold: 0.15 },
+      );
+      document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+
+      // ═══ ANIMATED EDITOR DEMO ═══
+      (function () {
+        const certName = document.getElementById('cert-name-el');
+        const certDate = document.getElementById('cert-date-el');
+        const demoCert = document.getElementById('demo-cert');
+        const demoTip = document.getElementById('demo-tip');
+        const sidebarIcons = document.querySelectorAll('#demo-sidebar i');
+        const fields = [
+          document.getElementById('df-1'),
+          document.getElementById('df-2'),
+          document.getElementById('df-3'),
+          document.getElementById('df-4'),
+          document.getElementById('df-5'),
+        ];
+        const layers = [
+          document.getElementById('dl-1'),
+          document.getElementById('dl-2'),
+          document.getElementById('dl-3'),
+        ];
+        const panelTitle = document.getElementById('dp-title');
+
+        // New elements
+        const statusText = document.getElementById('ds-status-text');
+        const zoomEl = document.getElementById('ds-zoom');
+        const layersCountEl = document.getElementById('ds-layers-count');
+        const guideH = document.getElementById('guide-h');
+        const guideV = document.getElementById('guide-v');
+        const batchOverlay = document.getElementById('demo-batch');
+        const batchBar = document.getElementById('batch-bar');
+        const batchCount = document.getElementById('batch-count');
+        const dtbBold = document.getElementById('dtb-bold');
+        const dtbItalic = document.getElementById('dtb-italic');
+        const dtbFont = document.getElementById('dtb-font');
+        const dtbSize = document.getElementById('dtb-size');
+        const dtbColor = document.getElementById('dtb-color');
+        const colorDots = document.querySelectorAll('#demo-colors .demo-color-dot');
+        const tbAlignBtns = [
+          document.getElementById('dtb-align-l'),
+          document.getElementById('dtb-align-c'),
+          document.getElementById('dtb-align-r'),
+        ];
+
+        let animStarted = false;
+
+        const demoObs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting && !animStarted) {
+                animStarted = true;
+                setTimeout(startDemoAnim, 600);
+              }
+            });
+          },
+          { threshold: 0.3 },
+        );
+        demoObs.observe(document.getElementById('demo-editor'));
+
+        function setActiveIcon(idx) {
+          sidebarIcons.forEach((ic, i) => ic.classList.toggle('active', i === idx));
+        }
+        function pulseField(idx) {
+          fields[idx].classList.add('pulse');
+          setTimeout(() => fields[idx].classList.remove('pulse'), 600);
+        }
+        function fillField(idx) {
+          fields[idx].classList.add('filled');
+        }
+        function clearFields() {
+          fields.forEach((f) => f.classList.remove('filled', 'pulse'));
+        }
+        function setActiveLayer(idx) {
+          layers.forEach((l, i) => l.classList.toggle('active', i === idx));
+        }
+        function setStatus(text, active) {
+          if (statusText) {
+            statusText.textContent = text;
+            statusText.classList.toggle('active', !!active);
+          }
+        }
+        function setZoom(val) {
+          if (zoomEl) zoomEl.textContent = val;
+        }
+        function setLayersNum(n) {
+          if (layersCountEl) layersCountEl.textContent = n + ' camadas';
+        }
+        function showGuides(duration) {
+          if (guideH) {
+            guideH.classList.add('show');
+            guideV.classList.add('show');
+          }
+          setTimeout(() => {
+            if (guideH) {
+              guideH.classList.remove('show');
+              guideV.classList.remove('show');
+            }
+          }, duration || 800);
+        }
+        function setToolbarBtn(btn, active) {
+          if (btn) btn.classList.toggle('active', active);
+        }
+        function setActiveColor(idx) {
+          colorDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          const colors = ['#a5b4fc', '#818cf8', '#f472b6', '#34d399', '#fbbf24'];
+          if (dtbColor && colors[idx]) dtbColor.style.background = colors[idx];
+        }
+        function setFontInfo(font, size) {
+          if (dtbFont) {
+            dtbFont.textContent = font;
+            dtbFont.classList.add('highlight');
+            setTimeout(() => dtbFont.classList.remove('highlight'), 800);
+          }
+          if (dtbSize) {
+            dtbSize.textContent = size;
+            dtbSize.classList.add('highlight');
+            setTimeout(() => dtbSize.classList.remove('highlight'), 800);
+          }
+        }
+        function animateBatch(callback) {
+          if (!batchOverlay) {
+            if (callback) callback();
+            return;
+          }
+          batchOverlay.classList.add('show');
+          let count = 0;
+          const total = 50;
+          const iv = setInterval(() => {
+            count += 2;
+            if (count > total) count = total;
+            batchBar.style.width = ((count / total) * 100).toFixed(0) + '%';
+            batchCount.textContent = count + ' / ' + total;
+            if (count >= total) {
+              clearInterval(iv);
+              setTimeout(() => {
+                batchOverlay.classList.remove('show');
+                batchBar.style.width = '0%';
+                batchCount.textContent = '0 / 50';
+                if (callback) callback();
+              }, 1200);
+            }
+          }, 80);
+        }
+
+        function typeText(el, text, speed, callback) {
+          el.innerHTML = '';
+          el.classList.add('selected');
+          let i = 0;
+          const cursor = document.createElement('span');
+          cursor.className = 'typing-cursor';
+          function type() {
+            if (i < text.length) {
+              el.textContent = text.slice(0, i + 1);
+              el.appendChild(cursor);
+              i++;
+              setTimeout(type, speed);
+            } else {
+              setTimeout(() => {
+                cursor.remove();
+                el.classList.remove('selected');
+                if (callback) callback();
+              }, 400);
+            }
+          }
+          el.appendChild(cursor);
+          setTimeout(type, 300);
+        }
+
+        function showTooltip(text, duration) {
+          demoTip.textContent = text;
+          demoTip.classList.add('show');
+          setTimeout(() => demoTip.classList.remove('show'), duration || 1500);
+        }
+
+        function startDemoAnim() {
+          const timeline = [
+            // 1 ─ Select text tool, highlight fonts, select {nome}
+            {
+              t: 0,
+              fn: () => {
+                setActiveIcon(1);
+                panelTitle.textContent = 'Texto';
+                setActiveLayer(1);
+                certName.classList.add('selected');
+                demoCert.classList.add('editing');
+                showTooltip('Selecionado: {nome}', 1800);
+                setStatus('Editando texto...', true);
+                setToolbarBtn(dtbBold, true);
+              },
+            },
+            // 2 ─ Pulse fields, change font info
+            {
+              t: 800,
+              fn: () => {
+                pulseField(0);
+                setFontInfo('Montserrat', '28px');
+              },
+            },
+            {
+              t: 1200,
+              fn: () => {
+                pulseField(1);
+                fillField(0);
+              },
+            },
+            {
+              t: 1600,
+              fn: () => {
+                pulseField(2);
+                fillField(1);
+                setToolbarBtn(dtbItalic, true);
+              },
+            },
+            {
+              t: 2000,
+              fn: () => {
+                fillField(2);
+                setActiveColor(1);
+              },
+            },
+            // 3 ─ Type name
+            {
+              t: 2600,
+              fn: () => {
+                showTooltip('Digitando nome...', 2000);
+                setStatus('Digitando...', true);
+                typeText(certName, 'Maria Silva', 80, () => {
+                  showTooltip('X: 245 Y: 182', 1200);
+                  setStatus('Texto inserido ✓', false);
+                });
+              },
+            },
+            // 4 ─ Switch to cursor, move with alignment guides
+            {
+              t: 5500,
+              fn: () => {
+                setActiveIcon(0);
+                panelTitle.textContent = 'Propriedades';
+                showTooltip('Movendo elemento...', 1500);
+                setStatus('Movendo...', true);
+                certName.style.transition = 'transform 0.6s ease';
+                certName.style.transform = 'translateX(8px) translateY(-3px)';
+                showGuides(800);
+                setZoom('125%');
+              },
+            },
+            {
+              t: 6200,
+              fn: () => {
+                certName.style.transform = 'translateX(0)';
+                showTooltip('X: 253 Y: 179', 1000);
+                pulseField(3);
+                fillField(3);
+                setStatus('Posição ajustada', false);
+              },
+            },
+            // 5 ─ Change color
+            {
+              t: 7200,
+              fn: () => {
+                setActiveColor(2);
+                showTooltip('Cor alterada', 1000);
+                setStatus('Cor atualizada', true);
+                certName.style.transition = 'color 0.4s';
+                certName.style.color = '#f472b6';
+              },
+            },
+            // 6 ─ Switch to layers, add date
+            {
+              t: 8200,
+              fn: () => {
+                setActiveIcon(3);
+                panelTitle.textContent = 'Camadas';
+                clearFields();
+                showTooltip('Nova camada: Data', 1500);
+                setStatus('Adicionando camada...', true);
+                certName.style.color = '';
+                certName.style.transition = '';
+                setActiveColor(0);
+              },
+            },
+            {
+              t: 9000,
+              fn: () => {
+                layers[2].style.opacity = '1';
+                setActiveLayer(2);
+                certDate.classList.add('show');
+                setLayersNum(3);
+                setStatus('3 camadas', false);
+              },
+            },
+            // 7 ─ Switch to image mode
+            {
+              t: 10000,
+              fn: () => {
+                setActiveIcon(2);
+                panelTitle.textContent = 'Imagem';
+                setStatus('Importando fundo...', true);
+                showTooltip('Upload: modelo.pdf', 1500);
+                clearFields();
+                setTimeout(() => {
+                  fillField(0);
+                  fillField(1);
+                }, 400);
+              },
+            },
+            // 8 ─ Switch to settings
+            {
+              t: 11500,
+              fn: () => {
+                setActiveIcon(4);
+                panelTitle.textContent = 'Configurações';
+                clearFields();
+                setTimeout(() => {
+                  fillField(0);
+                  fillField(1);
+                  fillField(2);
+                }, 400);
+                showTooltip('Configuração salva ✓', 1500);
+                setStatus('Salvo ✓', false);
+                setZoom('100%');
+              },
+            },
+            // 9 ─ Ready to generate
+            {
+              t: 13000,
+              fn: () => {
+                setActiveIcon(0);
+                panelTitle.textContent = 'Propriedades';
+                demoCert.classList.remove('editing');
+                certName.classList.remove('selected');
+                setActiveLayer(1);
+                showTooltip('Pronto para gerar!', 1800);
+                setStatus('Gerando em lote...', true);
+                setToolbarBtn(dtbBold, false);
+                setToolbarBtn(dtbItalic, false);
+              },
+            },
+            // 10 ─ Batch generation with progress bar
+            {
+              t: 14500,
+              fn: () => {
+                animateBatch(() => {
+                  showTooltip('50 certificados gerados! ✓', 2000);
+                  setStatus('Concluído — 50 certificados', false);
+                });
+              },
+            },
+            // 11 ─ Reset and restart
+            {
+              t: 19500,
+              fn: () => {
+                certName.textContent = '{nome}';
+                certName.style.transform = '';
+                certName.style.transition = '';
+                certName.style.color = '';
+                certName.classList.remove('selected');
+                certDate.classList.remove('show');
+                layers[2].style.opacity = '0';
+                demoCert.classList.remove('editing');
+                demoTip.classList.remove('show');
+                clearFields();
+                setActiveIcon(-1);
+                setActiveLayer(0);
+                panelTitle.textContent = 'Propriedades';
+                setStatus('Pronto', false);
+                setZoom('100%');
+                setLayersNum(2);
+                setActiveColor(0);
+                setToolbarBtn(dtbBold, false);
+                setToolbarBtn(dtbItalic, false);
+                if (dtbFont) dtbFont.textContent = 'Inter';
+                if (dtbSize) dtbSize.textContent = '24px';
+                tbAlignBtns.forEach((b, i) => b && b.classList.toggle('active', i === 1));
+                setTimeout(startDemoAnim, 1500);
+              },
+            },
+          ];
+
+          timeline.forEach((step) => setTimeout(step.fn, step.t));
+        }
+      })();
+    </script>
+  </body>
+</html>
