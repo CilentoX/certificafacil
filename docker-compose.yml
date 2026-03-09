@@ -27,7 +27,9 @@ services:
         condition: service_healthy
 
   db:
-    image: mysql:8.0
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-root_secret}
@@ -36,7 +38,6 @@ services:
       MYSQL_PASSWORD: ${DB_PASS:-certificafacil_secret}
     volumes:
       - db_data:/var/lib/mysql
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
       test:
         [

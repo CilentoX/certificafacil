@@ -60,6 +60,10 @@ COPY . .
 RUN rm -f _temp_admin.php debug_generate.log _output.txt start_php.bat \
     && rm -rf .git
 
+# Entrypoint script (waits for MySQL)
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create required directories
 RUN mkdir -p /var/www/html/uploads \
     /var/www/html/assets/templates \
@@ -80,7 +84,7 @@ RUN chown -R www-data:www-data /var/www/html \
 
 EXPOSE 80
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=5 \
   CMD curl -f http://localhost/api/templates || exit 1
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+ENTRYPOINT ["/entrypoint.sh"]
