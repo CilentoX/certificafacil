@@ -888,31 +888,49 @@ async function deleteImageFile(name) {
 /* ═══════════════════════════════════════════
    STUDENTS
    ═══════════════════════════════════════════ */
+let selectedStudents = new Set();
+
 function renderStudents(filter = '') {
   const $list = document.getElementById('stu-list');
   if (!$list) return;
   $list.innerHTML = '';
   const lc = filter.toLowerCase();
 
-  state.students.forEach((s, i) => {
-    /* Search across all variable values */
-    if (lc) {
-      const match = Object.values(s).some((v) => String(v).toLowerCase().includes(lc));
-      if (!match) return;
-    }
+  const filtered = state.students
+    .map((s, i) => ({ ...s, originalIdx: i }))
+    .filter((s) => {
+      if (!lc) return true;
+      return Object.values(s).some((v) => String(v).toLowerCase().includes(lc));
+    });
+
+  /* Update toolbar visibility */
+  const toolbar = document.getElementById('stu-toolbar');
+  if (toolbar) toolbar.style.display = filtered.length > 0 ? 'flex' : 'none';
+
+  filtered.forEach((s) => {
+    const i = s.originalIdx;
     const item = document.createElement('div');
     item.className = 'item' + (i === state.studentIdx ? ' on' : '');
+    
     /* Build display: show first two variable values */
     const vals = state.variables.map((v) => s[v.key] || '').filter(Boolean);
     const display =
       vals.length > 1 ? vals[0] + ' — ' + vals.slice(1).join(', ') : vals[0] || '(vazio)';
+    
+    const isChecked = selectedStudents.has(i);
+
     item.innerHTML = `
+      <label class="chk sm" onclick="event.stopPropagation()">
+        <input type="checkbox" class="stu-checkbox" data-idx="${i}" ${isChecked ? 'checked' : ''} onchange="toggleStudentSelection(${i}, this.checked)">
+        <span></span>
+      </label>
       <i data-lucide="user"></i>
       <span class="name">${display}</span>
       <div class="acts">
         <button class="tb-btn sm" onclick="event.stopPropagation();editStudent(${i})" title="Editar"><i data-lucide="pencil"></i></button>
         <button class="tb-btn sm" onclick="event.stopPropagation();removeStudent(${i})" title="Remover"><i data-lucide="trash-2"></i></button>
       </div>`;
+    
     item.onclick = () => {
       state.studentIdx = i;
       renderStudents(filter);
@@ -923,7 +941,75 @@ function renderStudents(filter = '') {
   });
 
   document.getElementById('stu-count').textContent = state.students.length;
+  
+  /* Update select all checkbox state */
+  const selectAllChk = document.getElementById('stu-select-all');
+  if (selectAllChk) {
+    selectAllChk.checked = filtered.length > 0 && filtered.every(s => selectedStudents.has(s.originalIdx));
+    selectAllChk.indeterminate = filtered.some(s => selectedStudents.has(s.originalIdx)) && !selectAllChk.checked;
+  }
+
   lucide.createIcons();
+}
+
+function toggleStudentSelection(idx, checked) {
+  if (checked) {
+    selectedStudents.add(idx);
+  } else {
+    selectedStudents.delete(idx);
+  }
+  /* Re-render to update Select All state */
+  const filter = document.getElementById('stu-search')?.value || '';
+  renderStudents(filter);
+}
+
+function toggleSelectAllStudents(checked) {
+  const filter = document.getElementById('stu-search')?.value || '';
+  const lc = filter.toLowerCase();
+  
+  state.students.forEach((s, i) => {
+    const matchesFilter = !lc || Object.values(s).some((v) => String(v).toLowerCase().includes(lc));
+    if (matchesFilter) {
+      if (checked) selectedStudents.add(i);
+      else selectedStudents.delete(i);
+    }
+  });
+  renderStudents(filter);
+}
+
+async function removeSelectedStudents() {
+  if (selectedStudents.size === 0) return;
+
+  const result = await Swal.fire({
+    title: `Excluir ${selectedStudents.size} aluno(s)?`,
+    text: 'Esta ação não pode ser desfeita.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sim, excluir',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#ff5252',
+    background: '#1c1c1c',
+    color: '#e5e5e5',
+  });
+
+  if (result.isConfirmed) {
+    state.removeStudents(Array.from(selectedStudents));
+    selectedStudents.clear();
+    renderStudents();
+    updateStudentNav();
+    generatePreview();
+    
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'success',
+      title: 'Alunos excluídos!',
+      showConfirmButton: false,
+      timer: 2000,
+      background: '#1c1c1c',
+      color: '#e5e5e5',
+    });
+  }
 }
 
 function updateStudentNav() {
@@ -1258,10 +1344,28 @@ async function generateBatch() {
     return;
   }
 
+  const result = await Swal.fire({
+    title: 'Formato de download',
+    text: 'Deseja um único PDF com todos os certificados ou um arquivo ZIP com eles separados?',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'PDF Único',
+    denyButtonText: 'Arquivos Separados (ZIP)',
+    showDenyButton: true,
+    background: '#1c1c1c',
+    color: '#e5e5e5',
+    confirmButtonColor: '#3085d6',
+    denyButtonColor: '#28a745',
+    cancelButtonText: 'Cancelar'
+  });
+
+  if (result.isDismissed) return;
+  const combinePdf = result.isConfirmed;
+
   showLoader(`Gerando ${state.students.length} certificado(s)...`);
   try {
     const items = state.students.map((s) => ({ ...s }));
-    const r = await API.generateBatch(state.template, state.getUIConfig(), items);
+    const r = await API.generateBatch(state.template, state.getUIConfig(), items, combinePdf);
     hideLoader();
 
     if (r.url) {
@@ -1271,11 +1375,12 @@ async function generateBatch() {
         jsc.addConfetti();
       } catch {}
 
+      const isZip = r.url.toLowerCase().endsWith('.zip');
       Swal.fire({
         icon: 'success',
         title: 'Lote gerado!',
         text: `${items.length} certificado(s)`,
-        confirmButtonText: 'Baixar PDF',
+        confirmButtonText: isZip ? 'Baixar ZIP' : 'Baixar PDF',
         background: '#1c1c1c',
         color: '#e5e5e5',
       }).then((res) => {

@@ -614,6 +614,15 @@
                 oninput="filterStudents(this.value)"
               />
             </div>
+            <div class="stu-toolbar" id="stu-toolbar" style="display: none;">
+              <label class="chk sm">
+                <input type="checkbox" id="stu-select-all" onchange="toggleSelectAllStudents(this.checked)">
+                <span>Selecionar todos</span>
+              </label>
+              <button class="tb-btn sm danger" onclick="removeSelectedStudents()" title="Excluir selecionados">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </div>
             <div id="stu-list" class="items"></div>
           </div>
         </section>

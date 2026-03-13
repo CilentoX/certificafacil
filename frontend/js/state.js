@@ -310,6 +310,22 @@ const state = (() => {
       if (_studentIdx >= _students.length) _studentIdx = _students.length - 1;
       _scheduleSave();
     },
+    removeStudents(indices) {
+      /* indices is an array of indices to remove */
+      const sorted = [...indices].sort((a, b) => b - a);
+      sorted.forEach((idx) => {
+        if (idx >= 0 && idx < _students.length) {
+          _students.splice(idx, 1);
+        }
+      });
+      if (!_students.length) {
+        const empty = {};
+        _variables.forEach((v) => (empty[v.key] = ''));
+        _students.push(empty);
+      }
+      _studentIdx = 0;
+      _scheduleSave();
+    },
     clearStudents() {
       const empty = {};
       _variables.forEach((v) => (empty[v.key] = ''));

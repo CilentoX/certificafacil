@@ -664,19 +664,58 @@ function handleGenerateBatch(): void
     ];
   }
 
-  // Generate all pages in a single PDF document (no re-import needed)
-  $finalPdfName = "lote_{$sessionId}.pdf";
-  $finalPdfPath = $UPLOAD_DIR . '/' . $finalPdfName;
+  // Generate certificates
+  $combinePdf = $body['combine_pdf'] ?? true;
+  $finalFile = '';
+  $finalName = '';
 
   try {
-    $engine->createBatchCertificate($templatePath, $finalPdfPath, $batchItems);
+    if (!$combinePdf) {
+      // ── Generate ZIP with individual files ──
+      $finalName = "lote_{$sessionId}.zip";
+      $finalFile = $UPLOAD_DIR . '/' . $finalName;
+      $zip = new \ZipArchive();
+
+      if ($zip->open($finalFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+        throw new \Exception("Could not create ZIP archive");
+      }
+
+      $tempFiles = [];
+      foreach ($batchItems as $idx => $item) {
+        $studentPdf = tempnam(sys_get_temp_dir(), 'cert_') . '.pdf';
+        $engine->createCertificate($templatePath, $studentPdf, $item['name'], $item['config']);
+
+        $safeName = sanitizeFilename($item['name']);
+        if (!str_ends_with(strtolower($safeName), '.pdf')) {
+          $safeName .= '.pdf';
+        }
+        // if sanitize returns something empty or generic, use index
+        if ($safeName === '.pdf') {
+          $safeName = "certificado_{$idx}.pdf";
+        }
+
+        $zip->addFile($studentPdf, $safeName);
+        $tempFiles[] = $studentPdf;
+      }
+      $zip->close();
+
+      // Cleanup temp files after zip is closed
+      foreach ($tempFiles as $f) {
+        @unlink($f);
+      }
+    } else {
+      // ── Generate single merged PDF ──
+      $finalName = "lote_{$sessionId}.pdf";
+      $finalFile = $UPLOAD_DIR . '/' . $finalName;
+      $engine->createBatchCertificate($templatePath, $finalFile, $batchItems);
+    }
   } catch (\Throwable $e) {
     error_log("Batch generation error: " . $e->getMessage());
     jsonResponse(['error' => 'Erro ao gerar lote: ' . $e->getMessage()], 500);
   }
 
-  if (file_exists($finalPdfPath) && filesize($finalPdfPath) > 0) {
-    jsonResponse(['url' => '/api/download/' . $finalPdfName]);
+  if (file_exists($finalFile) && filesize($finalFile) > 0) {
+    jsonResponse(['url' => '/api/download/' . $finalName]);
   }
 
   jsonResponse(['error' => 'Erro ao gerar lote'], 500);
@@ -696,7 +735,14 @@ function handleDownload(string $filename): void
     jsonResponse(['error' => 'File not found'], 404);
   }
 
-  header('Content-Type: application/pdf');
+  $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+  $mime = match ($ext) {
+    'pdf' => 'application/pdf',
+    'zip' => 'application/zip',
+    default => 'application/octet-stream',
+  };
+
+  header('Content-Type: ' . $mime);
   header('Content-Disposition: attachment; filename="' . $filename . '"');
   header('Content-Length: ' . filesize($path));
   readfile($path);

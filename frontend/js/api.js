@@ -95,11 +95,11 @@ const API = (() => {
     },
 
     /* ── Batch ── */
-    async generateBatch(templateName, config, items) {
+    async generateBatch(templateName, config, items, combinePdf = true) {
       return _json('/api/generate-batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ template_name: templateName, config, items, combine_pdf: true }),
+        body: JSON.stringify({ template_name: templateName, config, items, combine_pdf: combinePdf }),
       });
     },
   };
