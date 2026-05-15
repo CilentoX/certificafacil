@@ -26,4 +26,6 @@ Thumbs.db
 uploads/
 backend-node/uploads/
 backend-node/assets/fonts/
+backend-node/.wwebjs_auth/
+whatsapp_sessions/
 scratch/
