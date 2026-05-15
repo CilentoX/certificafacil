@@ -1,55 +1,62 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - '80'
+  db:
+    image: mysql:8.0
+    container_name: cf-db
+    restart: always
     environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_NAME=${DB_NAME:-certificafacil}
-      - DB_USER=${DB_USER:-certificafacil}
-      - DB_PASS=$SERVICE_PASSWORD_DB
-      - APP_URL=${SERVICE_FQDN_APP:-https://certificafacil.qwertyatlas.online}
-      - PUBLIC_KEY=${PUBLIC_KEY:-}
-      - ACCESS_TOKEN=${ACCESS_TOKEN:-}
-      - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET:-}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: certificafacil
     volumes:
-      - uploads_data:/var/www/html/uploads
-      - assets_templates:/var/www/html/assets/templates
-      - assets_fonts:/var/www/html/assets/fonts
-      - assets_images:/var/www/html/assets/images
-      - assets_configs:/var/www/html/assets/configs
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend-node
+      dockerfile: Dockerfile
+    container_name: cf-api
+    restart: always
+    environment:
+      DATABASE_URL: mysql://root:${DB_PASSWORD:-rootpassword}@db:3306/certificafacil
+      JWT_SECRET: ${JWT_SECRET}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      APP_URL: ${APP_URL}
+      API_BASE_URL: ${API_BASE_URL}
     depends_on:
       db:
         condition: service_healthy
-
-  db:
-    build:
-      context: .
-      dockerfile: docker/mysql/Dockerfile
-    restart: unless-stopped
-    exclude_from_hc: true
-    environment:
-      MYSQL_ROOT_PASSWORD: $SERVICE_PASSWORD_DBROOT
-      MYSQL_DATABASE: ${DB_NAME:-certificafacil}
-      MYSQL_USER: ${DB_USER:-certificafacil}
-      MYSQL_PASSWORD: $SERVICE_PASSWORD_DB
     volumes:
-      - db_data:/var/lib/mysql
-    healthcheck:
-      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 60s
+      - ./uploads:/app/uploads
+    # Traefik labels (Optional, Coolify usually handles this)
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.cf-api.rule=Host(`api.seudominio.com`)"
+    #   - "traefik.http.services.cf-api.loadbalancer.server.port=3000"
+
+  web:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: cf-web
+    restart: always
+    depends_on:
+      - api
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.cf-web.rule=Host(`seudominio.com`)"
+    #   - "traefik.http.services.cf-web.loadbalancer.server.port=80"
 
 volumes:
-  db_data:
-  uploads_data:
-  assets_templates:
-  assets_fonts:
-  assets_images:
-  assets_configs:
+  mysql-data:

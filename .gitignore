@@ -1,23 +1,29 @@
-# Environment
+# Node.js
+node_modules/
+dist/
+build/
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Temp/debug files
-_temp_admin.php
-_output.txt
-debug_generate.log
-*.log
+# Database
+mysql-data/
 
-# OS files
-Thumbs.db
+# OS
 .DS_Store
+Thumbs.db
 
 # IDE
 .vscode/
 .idea/
 
-# Uploads (user content)
-uploads/*
-!uploads/.gitkeep
-
-# Vendor (install via composer)
-# backend/vendor/  # Uncomment if you want to install fresh via composer install
+# App Specific
+uploads/
+backend-node/uploads/
+backend-node/assets/fonts/
+scratch/

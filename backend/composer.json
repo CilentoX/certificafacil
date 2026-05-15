@@ -1,9 +1,0 @@
-{
-  "name": "certificafacil/backend",
-  "description": "CertificaFacil - PHP Backend",
-  "require": {
-    "php": ">=8.0",
-    "tecnickcom/tcpdf": "^6.7",
-    "setasign/fpdi": "^2.6"
-  }
-}
