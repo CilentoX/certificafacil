@@ -37,11 +37,6 @@ services:
         condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
-    # Traefik labels (Optional, Coolify usually handles this)
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.cf-api.rule=Host(`api.seudominio.com`)"
-    #   - "traefik.http.services.cf-api.loadbalancer.server.port=3000"
 
   web:
     build:
@@ -53,10 +48,6 @@ services:
     restart: always
     depends_on:
       - api
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.cf-web.rule=Host(`seudominio.com`)"
-    #   - "traefik.http.services.cf-web.loadbalancer.server.port=80"
 
 volumes:
   mysql-data:
