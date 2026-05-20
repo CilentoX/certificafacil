@@ -8,6 +8,7 @@ export async function listUsers(request, reply) {
 
   try {
     const users = await prisma.user.findMany({
+      where: { deletedAt: null },
       include: { plan: { select: { name: true, slug: true } } },
       orderBy: { createdAt: 'desc' }
     });
@@ -32,11 +33,11 @@ export async function getStats(request, reply) {
 
   try {
     const [users, activeUsers, certs, recentCerts] = await Promise.all([
-      prisma.user.count(),
-      prisma.user.count({ where: { isActive: true } }),
-      prisma.certificate.count(),
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.user.count({ where: { isActive: true, deletedAt: null } }),
+      prisma.certificate.count({ where: { deletedAt: null } }),
       prisma.certificate.count({
-        where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }
+        where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, deletedAt: null }
       })
     ]);
 

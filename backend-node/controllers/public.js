@@ -7,8 +7,8 @@ export const validateCertificate = async (request, reply) => {
       return reply.status(400).send({ error: 'Código de validação não fornecido.' });
     }
 
-    const certificate = await prisma.certificate.findUnique({
-      where: { validationCode: code },
+    const certificate = await prisma.certificate.findFirst({
+      where: { validationCode: code, deletedAt: null },
       include: {
         user: {
           select: { name: true, email: true }

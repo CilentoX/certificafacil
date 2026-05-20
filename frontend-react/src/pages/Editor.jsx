@@ -132,6 +132,8 @@ export default function Editor() {
     } catch (err) { console.error('Erro ao carregar fontes:', err); }
   };
 
+  const lastSavedRef = useRef({ fieldsStr: '', projectName: '' });
+
   // Auto-Save Effect
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -142,6 +144,11 @@ export default function Editor() {
       // Don't auto-save if there's no content to save
       if (!currentTemplate && currentFields.length === 0) return;
 
+      const fieldsStr = JSON.stringify(currentFields);
+      if (lastSavedRef.current.fieldsStr === fieldsStr && lastSavedRef.current.projectName === projectName) {
+        return; // No changes to save
+      }
+
       const autoSave = async () => {
         try {
           setSaving(true);
@@ -151,6 +158,9 @@ export default function Editor() {
             templateName: currentTemplate,
             configJson: currentFields
           });
+          
+          lastSavedRef.current = { fieldsStr, projectName };
+          
           // If it was a new project, store the returned uid
           if (!currentProjectId && res.uid) {
             useEditorStore.setState({ projectId: res.uid });
@@ -167,7 +177,7 @@ export default function Editor() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [fields, projectName]);
+  }, [fields, projectName, navigate]);
 
 
   useEffect(() => {

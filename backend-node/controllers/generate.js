@@ -145,7 +145,8 @@ export async function generateBatch(request, reply) {
           const checkWhere = {
             userId: request.user.id,
             studentName: name,
-            templateName: templateFile
+            templateName: templateFile,
+            deletedAt: null
           };
           if (courseName) checkWhere.courseName = courseName;
           

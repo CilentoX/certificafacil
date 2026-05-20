@@ -6,7 +6,7 @@ import prisma from "../db.js";
 export async function listProjects(request, reply) {
   try {
     const projects = await prisma.project.findMany({
-      where: { userId: request.user.id },
+      where: { userId: request.user.id, deletedAt: null },
       orderBy: { updatedAt: "desc" },
     });
     return projects;
@@ -23,7 +23,7 @@ export async function getProject(request, reply) {
   try {
     const { uid } = request.params;
     const project = await prisma.project.findFirst({
-      where: { uid, userId: request.user.id },
+      where: { uid, userId: request.user.id, deletedAt: null },
     });
 
     if (!project) {
@@ -47,7 +47,7 @@ export async function saveProject(request, reply) {
     if (uid) {
       // Update existing project verifying ownership
       const existingProject = await prisma.project.findFirst({
-        where: { uid, userId: request.user.id }
+        where: { uid, userId: request.user.id, deletedAt: null }
       });
 
       if (!existingProject) {
@@ -104,8 +104,9 @@ export async function saveProject(request, reply) {
 export async function deleteProject(request, reply) {
   try {
     const { uid } = request.params;
-    await prisma.project.delete({
+    await prisma.project.updateMany({
       where: { uid, userId: request.user.id },
+      data: { deletedAt: new Date() }
     });
 
     await prisma.activityLog.create({
@@ -132,7 +133,7 @@ export async function duplicateProject(request, reply) {
     
     // Get existing project
     const existingProject = await prisma.project.findFirst({
-      where: { uid, userId: request.user.id }
+      where: { uid, userId: request.user.id, deletedAt: null }
     });
 
     if (!existingProject) {
@@ -146,7 +147,7 @@ export async function duplicateProject(request, reply) {
     });
 
     const projectCount = await prisma.project.count({
-      where: { userId: request.user.id },
+      where: { userId: request.user.id, deletedAt: null },
     });
 
     if (user.plan.maxTemplates !== 0 && projectCount >= user.plan.maxTemplates) {
